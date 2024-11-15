@@ -3,6 +3,7 @@ package com.skydev.product_inventory_management.presentation.dto.request;
 import java.time.LocalDate;
 
 import com.skydev.product_inventory_management.persistence.entity.enums.Gender;
+import com.skydev.product_inventory_management.presentation.validation.annotations.UniquePhone;
 import com.skydev.product_inventory_management.presentation.validation.annotations.ValidEnum;
 
 import jakarta.validation.constraints.Past;
@@ -38,6 +39,7 @@ public class UpdateUserDTO {
     private LocalDate birthDate;
 
     @Pattern(regexp = "^\\+[\\d]{1,3} [\\d]{7,14}$", message = "Phone format not valid")
+    @UniquePhone(message = "Phone already exists")
     private String phone;
 
 }

@@ -1,7 +1,5 @@
 package com.skydev.product_inventory_management.persistence.entity.enums;
 
-import java.util.List;
-
 import com.skydev.product_inventory_management.service.exceptions.InvalidInputException;
 
 import lombok.Getter;
@@ -23,7 +21,7 @@ public enum Gender {
         try{
             return Gender.valueOf(gender.toUpperCase());
         } catch (IllegalArgumentException iae){
-            throw new InvalidInputException(List.of("Gender is invalid"));
+            throw new InvalidInputException("Gender is invalid");
         }
     }
 

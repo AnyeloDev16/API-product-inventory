@@ -1,8 +1,10 @@
 package com.skydev.product_inventory_management.presentation.advice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.skydev.product_inventory_management.util.TitleMessageUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -16,10 +18,10 @@ import com.skydev.product_inventory_management.service.exceptions.InvalidInputEx
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class ValidationExceptionHandler {
 
-    @Value("${error.title.invalid_input}")
-    private String errorInvalidInput;
+    private final TitleMessageUtil titleMessageUtil;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> getMethodArgumentNotValidException(MethodArgumentNotValidException manve){
@@ -28,7 +30,7 @@ public class ValidationExceptionHandler {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse
                                 .builder()
-                                .title(errorInvalidInput)
+                                .title(titleMessageUtil.INVALID_INPUT_PROVIDED)
                                 .errorCode(HttpStatus.BAD_REQUEST.value())
                                 .errors(manve.getBindingResult()
                                                 .getFieldErrors()
@@ -47,7 +49,7 @@ public class ValidationExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse
                         .builder()
-                        .title(errorInvalidInput)
+                        .title(titleMessageUtil.INVALID_INPUT_PROVIDED)
                         .errorCode(HttpStatus.BAD_REQUEST.value())
                         .errors(hmve.getAllErrors().stream()
                                 .map(MessageSourceResolvable::getDefaultMessage)
@@ -61,12 +63,12 @@ public class ValidationExceptionHandler {
     public ResponseEntity<ErrorResponse> getInvalidInputException(InvalidInputException iie){
 
         return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(ErrorResponse
                                 .builder()
-                                .title(errorInvalidInput)
-                                .errorCode(HttpStatus.NOT_FOUND.value())
-                                .errors(iie.getListError())
+                                .title(titleMessageUtil.INVALID_INPUT_PROVIDED)
+                                .errorCode(HttpStatus.BAD_REQUEST.value())
+                                .errors(List.of(iie.getMessage()))
                                 .errorDate(LocalDateTime.now())
                                 .build());
 

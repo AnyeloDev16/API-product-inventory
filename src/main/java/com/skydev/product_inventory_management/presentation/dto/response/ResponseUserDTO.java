@@ -26,5 +26,6 @@ public class ResponseUserDTO implements IResponseUser{
     private String email;
     private String phone;
     private String role;
+    private Boolean active;
 
 }

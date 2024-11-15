@@ -1,5 +1,8 @@
 package com.skydev.product_inventory_management.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +12,6 @@ import com.skydev.product_inventory_management.persistence.entity.RoleEntity;
 import com.skydev.product_inventory_management.presentation.dto.request.RegisterUserAuthDTO;
 
 @Configuration
-
 @PropertySource("classpath:title-messages.properties")
 @PropertySource("classpath:messages.properties")
 public class AppConfig {
@@ -24,6 +26,14 @@ public class AppConfig {
 
         return modelMapper;
 
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
     }
 
 }

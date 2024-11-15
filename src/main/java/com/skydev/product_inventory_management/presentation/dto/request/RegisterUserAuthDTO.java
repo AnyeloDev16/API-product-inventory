@@ -3,6 +3,9 @@ package com.skydev.product_inventory_management.presentation.dto.request;
 import java.time.LocalDate;
 
 import com.skydev.product_inventory_management.persistence.entity.enums.Gender;
+import com.skydev.product_inventory_management.presentation.validation.annotations.UniqueEmail;
+import com.skydev.product_inventory_management.presentation.validation.annotations.UniquePhone;
+import com.skydev.product_inventory_management.presentation.validation.annotations.UniqueUsername;
 import com.skydev.product_inventory_management.presentation.validation.annotations.ValidEnum;
 
 import jakarta.validation.constraints.Email;
@@ -46,9 +49,11 @@ public class RegisterUserAuthDTO {
 
     @NotNull(message = "Email is required")
     @Email(message = "Email format not valid")
+    @UniqueEmail(message = "Email already exists")
     private String email;
 
     @Pattern(regexp = "^\\+[\\d]{1,3} [\\d]{7,14}$", message = "Phone format not valid")
+    @UniquePhone(message = "Phone already exists")
     private String phone;
 
     @NotNull(message = "Role is required")
@@ -56,6 +61,7 @@ public class RegisterUserAuthDTO {
 
     @NotNull(message = "Username is required")
     @Size(min = 8, max = 25, message = "Username length is min 8 and max 25")
+    @UniqueUsername(message = "Username already exists")
     private String username;
 
     @NotNull(message = "Password is required")

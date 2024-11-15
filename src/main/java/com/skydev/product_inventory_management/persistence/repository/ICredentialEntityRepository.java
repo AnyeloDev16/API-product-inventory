@@ -11,5 +11,7 @@ import com.skydev.product_inventory_management.persistence.entity.CredentialEnti
 public interface ICredentialEntityRepository extends JpaRepository<CredentialEntity, Long>{
 
     Optional<CredentialEntity> findByUser_userId(Long userId);
+    Optional<CredentialEntity> findByUsername(String username);
+    boolean existsByUsername(String username);
 
 }

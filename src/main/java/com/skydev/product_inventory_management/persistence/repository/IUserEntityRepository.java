@@ -8,4 +8,7 @@ import com.skydev.product_inventory_management.persistence.entity.UserEntity;
 @Repository
 public interface IUserEntityRepository extends JpaRepository<UserEntity, Long>{
 
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
+
 }

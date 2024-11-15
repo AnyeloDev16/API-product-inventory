@@ -1,8 +1,10 @@
 package com.skydev.product_inventory_management.presentation.advice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.skydev.product_inventory_management.util.TitleMessageUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,10 +14,10 @@ import com.skydev.product_inventory_management.presentation.advice.response.Erro
 import com.skydev.product_inventory_management.service.exceptions.EntityNotFoundException;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class CustomExceptionHandler {
 
-    @Value("${error.title.not_found}")
-    private String errorEntityNotFound;
+    private final TitleMessageUtil titleMessageUtil;
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> getEntityNotFoundException(EntityNotFoundException enfe){
@@ -24,9 +26,9 @@ public class CustomExceptionHandler {
                     .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse
                                 .builder()
-                                .title(errorEntityNotFound)
+                                .title(titleMessageUtil.RESOURCE_NOT_FOUND)
                                 .errorCode(HttpStatus.NOT_FOUND.value())
-                                .errors(enfe.getListError())
+                                .errors(List.of(enfe.getMessage()))
                                 .errorDate(LocalDateTime.now())
                                 .build());
 
