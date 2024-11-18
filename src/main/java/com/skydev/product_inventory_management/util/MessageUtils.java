@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MessageUtil {
+public class MessageUtils {
 
     @Value("${message.register.successful}")
     public String REGISTER_SUCCESSFUL;

@@ -3,7 +3,7 @@ package com.skydev.product_inventory_management.presentation.advice;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.skydev.product_inventory_management.util.TitleMessageUtil;
+import com.skydev.product_inventory_management.util.TitleMessageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import com.skydev.product_inventory_management.service.exceptions.EntityNotFound
 @RequiredArgsConstructor
 public class CustomExceptionHandler {
 
-    private final TitleMessageUtil titleMessageUtil;
+    private final TitleMessageUtils titleMessageUtils;
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> getEntityNotFoundException(EntityNotFoundException enfe){
@@ -26,7 +26,7 @@ public class CustomExceptionHandler {
                     .status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse
                                 .builder()
-                                .title(titleMessageUtil.RESOURCE_NOT_FOUND)
+                                .title(titleMessageUtils.RESOURCE_NOT_FOUND)
                                 .errorCode(HttpStatus.NOT_FOUND.value())
                                 .errors(List.of(enfe.getMessage()))
                                 .errorDate(LocalDateTime.now())

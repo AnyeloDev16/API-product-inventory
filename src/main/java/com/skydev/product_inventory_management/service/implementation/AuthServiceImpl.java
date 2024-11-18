@@ -8,24 +8,28 @@ import com.skydev.product_inventory_management.persistence.repository.IRoleEntit
 import com.skydev.product_inventory_management.persistence.repository.IUserEntityRepository;
 import com.skydev.product_inventory_management.presentation.dto.request.LoginUserAuthDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.RegisterUserAuthDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.ResponseAuthDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserAuthDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserDTO;
 import com.skydev.product_inventory_management.service.exceptions.InvalidInputException;
 import com.skydev.product_inventory_management.service.exceptions.InvalidPasswordException;
 import com.skydev.product_inventory_management.service.exceptions.UserNotActiveException;
 import com.skydev.product_inventory_management.service.interfaces.IAuthService;
-import com.skydev.product_inventory_management.util.MessageUtil;
+import com.skydev.product_inventory_management.util.JwtUtils;
+import com.skydev.product_inventory_management.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +38,11 @@ public class AuthServiceImpl implements IAuthService {
     private final IUserEntityRepository userRepository;
     private final IRoleEntityRepository roleRepository;
     private final ICredentialEntityRepository credentialRepository;
-    private final MessageUtil messageUtil;
+    private final MessageUtils messageUtils;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final UserDetailsServiceImpl userDetailsService;
+    private final JwtUtils jwtUtils;
 
     @Transactional(readOnly = true)
     public ResponseUserAuthDTO login(LoginUserAuthDTO loginUserAuthDTO) {
@@ -48,21 +53,22 @@ public class AuthServiceImpl implements IAuthService {
         Authentication authentication = authenticate(username, password);
 
         CredentialEntity credential = credentialRepository.findByUsername(username).orElseThrow(() ->
-                new UsernameNotFoundException(messageUtil.CREDENTIALS_USERNAME_NOT_FOUND));
+                new UsernameNotFoundException(messageUtils.CREDENTIALS_USERNAME_NOT_FOUND));
 
-        validateUserActive(credential);
+        UserEntity user = credential.getUser();
+
+        validateUserActive(user);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        ResponseUserDTO responseUserDTO = modelMapper.map(credential.getUser(), ResponseUserDTO.class);
-        ResponseAuthDTO responseAuthDTO = ResponseAuthDTO.builder()
-                .username(username)
-                .message(messageUtil.LOGIN_SUCCESSFUL)
-                .build();
+        String accessToken = jwtUtils.createToken(authentication, user.getUserId());
+
+        ResponseUserDTO responseUserDTO = modelMapper.map(user, ResponseUserDTO.class);
 
         return ResponseUserAuthDTO.builder()
+                .auth(messageUtils.LOGIN_SUCCESSFUL)
                 .user(responseUserDTO)
-                .auth(responseAuthDTO)
+                .jwtToken(accessToken)
                 .build();
 
     }
@@ -73,7 +79,7 @@ public class AuthServiceImpl implements IAuthService {
         RoleEntity role = modelMapper.map(registerUserAuthDTO, RoleEntity.class);
 
         role = roleRepository.findByRoleName(role.getRoleName())
-                .orElseThrow(() -> new InvalidInputException(messageUtil.ROLE_NOT_FOUND));
+                .orElseThrow(() -> new InvalidInputException(messageUtils.ROLE_NOT_FOUND));
 
         UserEntity newUser = modelMapper.map(registerUserAuthDTO, UserEntity.class);
 
@@ -87,16 +93,27 @@ public class AuthServiceImpl implements IAuthService {
 
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
         credential.setUser(newUser);
-        credentialRepository.save(credential);
+        credential = credentialRepository.save(credential);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(credential.getUsername(), null, getSimpleGrantedAuthorities(role));
+
+        String accessToken = jwtUtils.createToken(authentication, newUser.getUserId());
 
         ResponseUserDTO responseUserDTO = modelMapper.map(newUser, ResponseUserDTO.class);
-        ResponseAuthDTO responseAuthDTO = ResponseAuthDTO.builder()
-                .username(credential.getUsername())
-                .message(messageUtil.REGISTER_SUCCESSFUL)
-                .build();
 
-        return ResponseUserAuthDTO.builder().auth(responseAuthDTO).user(responseUserDTO).build();
+        return ResponseUserAuthDTO.builder()
+                                    .auth(messageUtils.REGISTER_SUCCESSFUL)
+                                    .user(responseUserDTO)
+                                    .jwtToken(accessToken)
+                                    .build();
 
+    }
+
+    private List<SimpleGrantedAuthority> getSimpleGrantedAuthorities(RoleEntity role) {
+        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+
+        authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleName())));
+        return authorityList;
     }
 
     @Transactional(readOnly = true)
@@ -105,16 +122,16 @@ public class AuthServiceImpl implements IAuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if(!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new InvalidPasswordException(messageUtil.CREDENTIALS_INVALID_PASSWORD);
+            throw new InvalidPasswordException(messageUtils.CREDENTIALS_INVALID_PASSWORD);
         }
 
-        return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
     }
 
-    public void validateUserActive(CredentialEntity credential) {
-        if(Boolean.FALSE.equals(credential.getUser().getActive())) {
-            throw new UserNotActiveException(messageUtil.USER_NOT_ACTIVE);
+    public void validateUserActive(UserEntity userEntity) {
+        if(Boolean.FALSE.equals(userEntity.getActive())) {
+            throw new UserNotActiveException(messageUtils.USER_NOT_ACTIVE);
         }
     }
 

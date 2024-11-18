@@ -3,9 +3,8 @@ package com.skydev.product_inventory_management.service.implementation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.skydev.product_inventory_management.util.MessageUtil;
+import com.skydev.product_inventory_management.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements  UserDetailsService{
 
     private final ICredentialEntityRepository credentialRepository;
-    private final MessageUtil messageUtil;
+    private final MessageUtils messageUtils;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,7 +29,7 @@ public class UserDetailsServiceImpl implements  UserDetailsService{
 
         CredentialEntity findCred = credentialRepository.findByUsername(username)
                                             .orElseThrow(() ->
-                                                    new UsernameNotFoundException(messageUtil.CREDENTIALS_USERNAME_NOT_FOUND));
+                                                    new UsernameNotFoundException(messageUtils.CREDENTIALS_USERNAME_NOT_FOUND));
 
         List<SimpleGrantedAuthority> listAuthority = new ArrayList<>();
 

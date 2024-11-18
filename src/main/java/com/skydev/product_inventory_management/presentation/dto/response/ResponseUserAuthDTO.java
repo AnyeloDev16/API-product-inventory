@@ -1,5 +1,6 @@
 package com.skydev.product_inventory_management.presentation.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,10 @@ import lombok.Setter;
 @Builder
 public class ResponseUserAuthDTO {
 
-    private ResponseAuthDTO auth;
+    private String auth;
     private ResponseUserDTO user;
+
+    @JsonIgnore
+    private String jwtToken;
 
 }

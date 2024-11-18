@@ -2,7 +2,7 @@ package com.skydev.product_inventory_management.service.implementation;
 
 import java.util.List;
 
-import com.skydev.product_inventory_management.util.MessageUtil;
+import com.skydev.product_inventory_management.util.MessageUtils;
 import com.skydev.product_inventory_management.util.UserEntityHelper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,7 +29,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
     private final IUserEntityRepository userRepository;
     private final ICredentialEntityRepository credentialRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MessageUtil messageUtil;
+    private final MessageUtils messageUtils;
 
     @Override
     @Transactional
@@ -37,7 +37,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
 
         UserEntity findUser = userRepository.findById(idUser)
                                             .orElseThrow(() -> 
-                                                     new EntityNotFoundException(messageUtil.USER_ID_NOT_FOUND));
+                                                     new EntityNotFoundException(messageUtils.USER_ID_NOT_FOUND));
 
         UserEntityHelper.updateUser(findUser, updateUserDTO);
 
@@ -53,7 +53,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
 
         CredentialEntity findCredential = credentialRepository.findByUser_userId(idUser)
                                                 .orElseThrow(() -> 
-                                                    new EntityNotFoundException(messageUtil.USER_ID_NOT_FOUND));
+                                                    new EntityNotFoundException(messageUtils.USER_ID_NOT_FOUND));
 
         findCredential.setPassword(passwordEncoder.encode(updatePasswordUserDTO.getNewPassword()));
         
@@ -67,7 +67,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
 
         UserEntity findUser = userRepository.findById(idUser)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(messageUtil.USER_ID_NOT_FOUND));
+                        new EntityNotFoundException(messageUtils.USER_ID_NOT_FOUND));
 
         findUser.setActive(!findUser.getActive());
 
@@ -81,7 +81,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
 
         UserEntity findUser = userRepository.findById(idUser)
                                             .orElseThrow(() -> 
-                                                     new EntityNotFoundException(messageUtil.USER_ID_NOT_FOUND));
+                                                     new EntityNotFoundException(messageUtils.USER_ID_NOT_FOUND));
 
         return modelMapper.map(findUser, dtoClass);
                                             

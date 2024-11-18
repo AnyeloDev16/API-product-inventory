@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TitleMessageUtil {
+public class TitleMessageUtils {
 
     @Value("${error.title.resource.not_found}")
     public String RESOURCE_NOT_FOUND;

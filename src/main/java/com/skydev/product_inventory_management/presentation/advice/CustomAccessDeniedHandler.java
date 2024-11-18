@@ -2,7 +2,7 @@ package com.skydev.product_inventory_management.presentation.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skydev.product_inventory_management.presentation.advice.response.ErrorResponse;
-import com.skydev.product_inventory_management.util.TitleMessageUtil;
+import com.skydev.product_inventory_management.util.TitleMessageUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,13 +21,13 @@ import java.util.List;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
-    private final TitleMessageUtil  titleMessageUtil;
+    private final TitleMessageUtils titleMessageUtils;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .title(titleMessageUtil.FORBIDDEN_ACCESS)
+                .title(titleMessageUtils.FORBIDDEN_ACCESS)
                 .errorCode(HttpStatus.FORBIDDEN.value())
                 .errors(List.of(accessDeniedException.getMessage()))
                 .errorDate(LocalDateTime.now())

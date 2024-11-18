@@ -2,6 +2,7 @@ package com.skydev.product_inventory_management.presentation.controller;
 
 import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserAuthDTO;
 import com.skydev.product_inventory_management.service.interfaces.IAuthService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +27,25 @@ public class AuthUserController {
 
     @PostMapping("/log-in")
     public ResponseEntity<ResponseUserAuthDTO> login(@Valid @RequestBody LoginUserAuthDTO loginAuth) {
-    
-        return ResponseEntity.
-                        status(HttpStatus.OK)
-                        .body(authService.login(loginAuth));
+
+        ResponseUserAuthDTO response = authService.login(loginAuth);
+
+        return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + response.getJwtToken())
+                        .body(response);
 
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<ResponseUserAuthDTO> register(@Valid @RequestBody RegisterUserAuthDTO registerUserDTO){
+
+        ResponseUserAuthDTO response = authService.register(registerUserDTO);
+
         return ResponseEntity
                         .status(HttpStatus.CREATED)
-                        .body(authService.register(registerUserDTO));
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + response.getJwtToken())
+                        .body(response);
     }
 
 }

@@ -1,7 +1,9 @@
 package com.skydev.product_inventory_management.configuration.security;
 
+import com.skydev.product_inventory_management.configuration.security.filter.JwtFilter;
 import com.skydev.product_inventory_management.presentation.advice.CustomAccessDeniedHandler;
 import com.skydev.product_inventory_management.presentation.advice.CustomAuthenticationEntryPointHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,8 +20,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.skydev.product_inventory_management.service.implementation.UserDetailsServiceImpl;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity  //Habilita la configuracion de seguridad
 //@EnableMethodSecurity //Habilita las annotaciones para metodos como @Secured @PreAuthorize
 public class SecurityConfig{
@@ -30,11 +34,7 @@ public class SecurityConfig{
 
     private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-
-    public SecurityConfig(CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler, CustomAccessDeniedHandler customAccessDeniedHandler) {
-        this.customAuthenticationEntryPointHandler = customAuthenticationEntryPointHandler;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
-    }
+    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -52,10 +52,10 @@ public class SecurityConfig{
                     .requestMatchers(HttpMethod.PUT, "/api/user/{idUser}/password").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     // REMAINING
                     .anyRequest().denyAll())
-                .httpBasic(httpB -> httpB
-                    .authenticationEntryPoint(customAuthenticationEntryPointHandler)) //Validation for AUTH BASIC
                 .exceptionHandling(exception -> exception
+                    .authenticationEntryPoint(customAuthenticationEntryPointHandler)
                     .accessDeniedHandler(customAccessDeniedHandler)) //Authorization for All
+                .addFilterBefore(jwtFilter, BasicAuthenticationFilter.class)
                 .build();
     }
 

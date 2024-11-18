@@ -3,8 +3,8 @@ package com.skydev.product_inventory_management.presentation.advice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skydev.product_inventory_management.presentation.advice.response.ErrorResponse;
 import com.skydev.product_inventory_management.service.exceptions.InvalidPasswordException;
-import com.skydev.product_inventory_management.util.MessageUtil;
-import com.skydev.product_inventory_management.util.TitleMessageUtil;
+import com.skydev.product_inventory_management.util.MessageUtils;
+import com.skydev.product_inventory_management.util.TitleMessageUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +24,21 @@ import java.util.List;
 public class CustomAuthenticationEntryPointHandler implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
-    private final TitleMessageUtil titleMessageUtil;
-    private final MessageUtil messageUtil;
+    private final TitleMessageUtils titleMessageUtils;
+    private final MessageUtils messageUtils;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
 
         String errorMessage = switch (authException) {
-            case UsernameNotFoundException usernameNotFoundException -> messageUtil.CREDENTIALS_USERNAME_NOT_FOUND;
-            case InvalidPasswordException invalidPasswordException -> messageUtil.CREDENTIALS_INVALID_PASSWORD;
-            case BadCredentialsException badCredentialsException -> messageUtil.INVALID_CREDENTIALS;
+            case UsernameNotFoundException usernameNotFoundException -> messageUtils.CREDENTIALS_USERNAME_NOT_FOUND;
+            case InvalidPasswordException invalidPasswordException -> messageUtils.CREDENTIALS_INVALID_PASSWORD;
+            case BadCredentialsException badCredentialsException -> messageUtils.INVALID_CREDENTIALS;
             case null, default -> authException.getMessage();
         };
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .title(titleMessageUtil.AUTHENTICATION_ERROR)
+                .title(titleMessageUtils.AUTHENTICATION_ERROR)
                 .errorCode(HttpStatus.UNAUTHORIZED.value())
                 .errors(List.of(errorMessage))
                 .errorDate(LocalDateTime.now())
