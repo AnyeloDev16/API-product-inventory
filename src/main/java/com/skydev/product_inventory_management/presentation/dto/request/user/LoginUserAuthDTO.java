@@ -1,4 +1,4 @@
-package com.skydev.product_inventory_management.presentation.dto.request;
+package com.skydev.product_inventory_management.presentation.dto.request.user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,10 +18,10 @@ public class LoginUserAuthDTO {
 
     @NotNull(message = "Username is required")
     @Size(min = 8, max = 25, message = "Username length is min 8 and max 25")
-    String username;
+    private String username;
 
     @NotNull(message = "Password is required")
     @Size(min = 8, max = 25, message = "Password length is min 8 and max 25")
-    String password;
+    private String password;
 
 }

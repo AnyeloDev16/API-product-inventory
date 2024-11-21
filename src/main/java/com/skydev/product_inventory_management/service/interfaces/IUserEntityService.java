@@ -3,9 +3,9 @@ package com.skydev.product_inventory_management.service.interfaces;
 import java.util.List;
 
 import com.skydev.product_inventory_management.presentation.dto.relationDTO.IResponseUser;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdatePasswordUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdateUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdatePasswordUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdateUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserDTO;
 
 public interface IUserEntityService {
 

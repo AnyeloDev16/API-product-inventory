@@ -3,7 +3,7 @@ package com.skydev.product_inventory_management.service.implementation;
 import java.util.List;
 
 import com.skydev.product_inventory_management.util.MessageUtils;
-import com.skydev.product_inventory_management.util.UserEntityHelper;
+import com.skydev.product_inventory_management.util.EntityHelper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,9 +15,9 @@ import com.skydev.product_inventory_management.persistence.entity.UserEntity;
 import com.skydev.product_inventory_management.persistence.repository.ICredentialEntityRepository;
 import com.skydev.product_inventory_management.persistence.repository.IUserEntityRepository;
 import com.skydev.product_inventory_management.presentation.dto.relationDTO.IResponseUser;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdatePasswordUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdateUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdatePasswordUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdateUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserDTO;
 import com.skydev.product_inventory_management.service.exceptions.EntityNotFoundException;
 import com.skydev.product_inventory_management.service.interfaces.IUserEntityService;
 
@@ -39,7 +39,7 @@ public class UserEntityServiceImpl implements IUserEntityService{
                                             .orElseThrow(() -> 
                                                      new EntityNotFoundException(messageUtils.USER_ID_NOT_FOUND));
 
-        UserEntityHelper.updateUser(findUser, updateUserDTO);
+        EntityHelper.updateUser(findUser, updateUserDTO);
 
         findUser = userRepository.save(findUser);
 

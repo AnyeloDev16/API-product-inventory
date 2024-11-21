@@ -1,4 +1,4 @@
-package com.skydev.product_inventory_management.presentation.dto.response;
+package com.skydev.product_inventory_management.presentation.dto.response.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

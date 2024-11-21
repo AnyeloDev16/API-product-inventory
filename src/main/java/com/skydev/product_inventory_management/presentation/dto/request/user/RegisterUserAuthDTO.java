@@ -1,4 +1,4 @@
-package com.skydev.product_inventory_management.presentation.dto.request;
+package com.skydev.product_inventory_management.presentation.dto.request.user;
 
 import java.time.LocalDate;
 

@@ -31,6 +31,21 @@ public class MessageUtils {
     public String USER_NOT_ACTIVE;
 
     @Value("${error.message.credential.invalid_credentials}")
-    public  String INVALID_CREDENTIALS;
+    public String INVALID_CREDENTIALS;
+
+    @Value("${error.message.category.id_not_found}")
+    public String CATEGORY_ID_NOT_FOUND;
+
+    @Value("${error.message.category.id_invalid}")
+    public String CATEGORY_ID_INVALID;
+
+    @Value("${error.message.product.id_not_found}")
+    public String PRODUCT_ID_NOT_FOUND;
+
+    @Value("${error.message.product.id_invalid}")
+    public String PRODUCT_ID_INVALID;
+
+    @Value("${error.message.page.page_invalid}")
+    public String PAGE_INVALID;
 
 }

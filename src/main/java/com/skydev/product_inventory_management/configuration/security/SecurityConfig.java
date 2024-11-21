@@ -43,13 +43,25 @@ public class SecurityConfig{
                 .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
                      // PUBLIC
                     .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/product/user/**").permitAll()
                     // PROTECTED
+                    //User
                     .requestMatchers(HttpMethod.GET, "/api/user").hasRole(ROLE_ADMIN)
                     .requestMatchers(HttpMethod.PUT, "/api/user/{idUser}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     .requestMatchers(HttpMethod.PUT, "/api/user/{idUser}/active").hasAnyRole(ROLE_ADMIN)
                     .requestMatchers(HttpMethod.PUT, "/api/user/{idUser}/password").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    //Category
+                    .requestMatchers(HttpMethod.GET, "/api/category").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.GET, "/api/category/{idCategory}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.POST, "/api/category").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.PUT, "/api/category/{idCategory}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    //Product
+                    .requestMatchers(HttpMethod.GET, "/api/product/staff/**").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.POST, "/api/product/staff").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.PUT, "/api/product/staff/**").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
                     // REMAINING
                     .anyRequest().denyAll())
                 .exceptionHandling(exception -> exception

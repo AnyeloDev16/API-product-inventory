@@ -9,10 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.skydev.product_inventory_management.presentation.dto.relationDTO.IResponseUser;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdatePasswordUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.request.UpdateUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.ResponseUserAdminDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdatePasswordUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.user.UpdateUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserAdminDTO;
 import com.skydev.product_inventory_management.service.interfaces.IUserEntityService;
 
 import jakarta.validation.Valid;
