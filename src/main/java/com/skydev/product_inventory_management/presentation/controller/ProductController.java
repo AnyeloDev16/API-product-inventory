@@ -1,11 +1,13 @@
 package com.skydev.product_inventory_management.presentation.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.skydev.product_inventory_management.presentation.dto.request.product.RegisterProductDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.product.UpdateProductDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.product.ResponseProductAdminDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.product.ResponseProductUserDTO;
 import com.skydev.product_inventory_management.service.exceptions.InvalidInputException;
 import com.skydev.product_inventory_management.service.interfaces.IProductService;
+import com.skydev.product_inventory_management.util.JwtUtils;
 import com.skydev.product_inventory_management.util.MessageUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,36 +25,56 @@ public class ProductController {
 
     private final IProductService productService;
     private final MessageUtils messageUtils;
+    private final JwtUtils jwtUtils;
 
     public static final boolean PRODUCT_ACTIVE = true;
 
     @PostMapping("/staff")
-    public ResponseEntity<ResponseProductAdminDTO> saveProduct(@Valid @RequestBody RegisterProductDTO registerProductDTO){
+    public ResponseEntity<ResponseProductAdminDTO> saveProduct(@Valid @RequestBody RegisterProductDTO registerProductDTO, @RequestHeader(value = "Authorization") String authHeader){
+
+        authHeader = authHeader.substring(7);
+
+        DecodedJWT decodedJWT = jwtUtils.validateToken(authHeader);
+
+        Long idUser = decodedJWT.getClaim("idUser").asLong();
+
         return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(productService.saveProduct(registerProductDTO));
+                    .body(productService.saveProduct(registerProductDTO, idUser));
     }
 
     @PutMapping("/staff/{idProduct}")
-    public ResponseEntity<ResponseProductAdminDTO> updateProduct(@PathVariable Long idProduct, @Valid @RequestBody UpdateProductDTO updateProductDTO){
+    public ResponseEntity<ResponseProductAdminDTO> updateProduct(@PathVariable Long idProduct, @Valid @RequestBody UpdateProductDTO updateProductDTO, @RequestHeader(value = "Authorization") String authHeader){
 
         if(idProduct <= 0){
             throw new InvalidInputException(messageUtils.PRODUCT_ID_INVALID);
         }
+
+        authHeader = authHeader.substring(7);
+
+        DecodedJWT decodedJWT = jwtUtils.validateToken(authHeader);
+
+        Long idUser = decodedJWT.getClaim("idUser").asLong();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productService.updateProduct(idProduct, updateProductDTO));
+                .body(productService.updateProduct(idProduct, updateProductDTO, idUser));
     }
 
     @PutMapping("/staff/{idProduct}/active")
-    public ResponseEntity<Void> updateActive(@PathVariable Long idProduct){
+    public ResponseEntity<Void> updateActive(@PathVariable Long idProduct, @RequestHeader(value = "Authorization") String authHeader){
 
         if(idProduct <= 0){
             throw new InvalidInputException(messageUtils.PRODUCT_ID_INVALID);
         }
 
-        productService.updateActive(idProduct);
+        authHeader = authHeader.substring(7);
+
+        DecodedJWT decodedJWT = jwtUtils.validateToken(authHeader);
+
+        Long idUser = decodedJWT.getClaim("idUser").asLong();
+
+        productService.updateActive(idProduct, idUser);
 
         return ResponseEntity
                     .status(HttpStatus.OK)

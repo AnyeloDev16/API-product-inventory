@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 
 public interface IProductService{
 
-    ResponseProductAdminDTO saveProduct(RegisterProductDTO registerProductDTO);
-    ResponseProductAdminDTO updateProduct(Long idProduct, UpdateProductDTO updateProductDTO);
-    void updateActive(Long idProduct);
+    ResponseProductAdminDTO saveProduct(RegisterProductDTO registerProductDTO, Long idUser);
+    ResponseProductAdminDTO updateProduct(Long idProduct, UpdateProductDTO updateProductDTO, Long idUser);
+    void updateActive(Long idProduct, Long idUser);
     <T extends IResponseProduct> Page<T> findProductAll(Class<T> dtoClass, int pageNumber, int pageSize, Boolean active);
     <T extends IResponseProduct> Page<T> findProductAllByProductName(Class<T> dtoClass, String productName, int pageNumber, int pageSize, Boolean active);
     <T extends IResponseProduct> Page<T> findProductAllByCategoryId(Class<T> dtoClass, Long idCategory, int pageNumber, int pageSize, Boolean active);

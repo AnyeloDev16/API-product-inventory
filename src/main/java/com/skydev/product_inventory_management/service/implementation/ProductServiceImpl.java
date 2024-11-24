@@ -2,6 +2,10 @@ package com.skydev.product_inventory_management.service.implementation;
 
 import com.skydev.product_inventory_management.persistence.entity.Category;
 import com.skydev.product_inventory_management.persistence.entity.Product;
+import com.skydev.product_inventory_management.persistence.entity.ProductAuditLog;
+import com.skydev.product_inventory_management.persistence.entity.UserEntity;
+import com.skydev.product_inventory_management.persistence.entity.enums.Action;
+import com.skydev.product_inventory_management.persistence.repository.IProductAuditLogRepository;
 import com.skydev.product_inventory_management.persistence.repository.IProductPagingRepository;
 import com.skydev.product_inventory_management.persistence.repository.IProductRepository;
 import com.skydev.product_inventory_management.presentation.dto.relationDTO.IResponseProduct;
@@ -14,27 +18,32 @@ import com.skydev.product_inventory_management.service.interfaces.IProductServic
 import com.skydev.product_inventory_management.util.EntityHelper;
 import com.skydev.product_inventory_management.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.Pair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements IProductService {
 
     private final IProductRepository productRepository;
     private final IProductPagingRepository productPagingRepository;
+    private final IProductAuditLogRepository productAuditLogRepository;
     private final ICategoryService categoryService;
     private final ModelMapper modelMapper;
     private final MessageUtils messageUtils;
 
     @Override
     @Transactional
-    public ResponseProductAdminDTO saveProduct(RegisterProductDTO registerProductDTO) {
+    public ResponseProductAdminDTO saveProduct(RegisterProductDTO registerProductDTO, Long idUser) {
 
         Product newProduct = modelMapper.map(registerProductDTO, Product.class);
 
@@ -52,12 +61,16 @@ public class ProductServiceImpl implements IProductService {
 
         newProduct = productRepository.save(newProduct);
 
+        // Audit
+
+        saveAuditProduct(newProduct, Action.CREATE, null, null, idUser);
+
         return modelMapper.map(newProduct, ResponseProductAdminDTO.class);
     }
 
     @Override
     @Transactional
-    public ResponseProductAdminDTO updateProduct(Long idProduct, UpdateProductDTO updateProductDTO) {
+    public ResponseProductAdminDTO updateProduct(Long idProduct, UpdateProductDTO updateProductDTO, Long idUser) {
 
         Product findProduct = productRepository.findById(idProduct)
                                                     .orElseThrow( ()->
@@ -71,9 +84,15 @@ public class ProductServiceImpl implements IProductService {
             newCategory = modelMapper.map(categoryService.findCategoryById(categoryId), Category.class);
         }
 
-        EntityHelper.updateProduct(findProduct, updateProductDTO, newCategory);
+        Pair<String, String> data = EntityHelper.updateProduct(findProduct, updateProductDTO, newCategory);
 
-        findProduct = productRepository.save(findProduct);
+        String oldData = data.getLeft();
+        String newData = data.getRight();
+
+        if(!oldData.equals("{}") || !newData.equals("{}")){
+            findProduct = productRepository.save(findProduct);
+            saveAuditProduct(findProduct, Action.UPDATE, data.getLeft(), data.getRight(), idUser);
+        }
 
         return modelMapper.map(findProduct, ResponseProductAdminDTO.class);
 
@@ -81,15 +100,27 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    public void updateActive(Long idProduct) {
+    public void updateActive(Long idProduct, Long idUser) {
 
         Product findProduct = productRepository.findById(idProduct)
                 .orElseThrow( ()->
                         new EntityNotFoundException(messageUtils.PRODUCT_ID_NOT_FOUND));
 
-        findProduct.setActive(!findProduct.getActive());
+        boolean changeActive = !findProduct.getActive();
+
+        findProduct.setActive(changeActive);
 
         productRepository.save(findProduct);
+
+        Action action;
+
+        if(changeActive){
+            action = Action.ACTIVE;
+        } else {
+            action = Action.INACTIVE;
+        }
+
+        saveAuditProduct(findProduct, action, null, null, idUser);
 
     }
 
@@ -166,6 +197,22 @@ public class ProductServiceImpl implements IProductService {
                         new EntityNotFoundException(messageUtils.PRODUCT_ID_NOT_FOUND));
 
         return modelMapper.map(findProduct, dtoClass);
+    }
+
+    @Transactional
+    public void saveAuditProduct(Product product, Action action, String oldData, String newData, Long idUser) {
+
+        ProductAuditLog productAudit= ProductAuditLog.builder()
+                .product(product)
+                .action(action)
+                .oldData(oldData)
+                .newData(newData)
+                .changedBy(UserEntity.builder().userId(idUser).build())
+                .changedDate(LocalDateTime.now())
+                .build();
+
+        productAuditLogRepository.save(productAudit);
+
     }
 
 }

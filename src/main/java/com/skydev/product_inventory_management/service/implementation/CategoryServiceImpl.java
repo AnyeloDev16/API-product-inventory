@@ -10,7 +10,6 @@ import com.skydev.product_inventory_management.service.interfaces.ICategoryServi
 import com.skydev.product_inventory_management.util.EntityHelper;
 import com.skydev.product_inventory_management.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

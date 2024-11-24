@@ -7,6 +7,7 @@ import com.skydev.product_inventory_management.persistence.entity.enums.Gender;
 import com.skydev.product_inventory_management.presentation.dto.request.category.UpdateCategoryDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.product.UpdateProductDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.user.UpdateUserDTO;
+import org.modelmapper.internal.Pair;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -62,8 +63,7 @@ public class EntityHelper {
 
     }
 
-    public static void updateProduct(Product product, UpdateProductDTO updateProductDTO, Category category){
-
+    public static Pair<String, String> updateProduct(Product product, UpdateProductDTO updateProductDTO, Category category) {
         String productName = updateProductDTO.getProductName();
         String description = updateProductDTO.getDescription();
         BigDecimal purchasePrice = updateProductDTO.getPurchasePrice();
@@ -71,34 +71,69 @@ public class EntityHelper {
         Integer stock = updateProductDTO.getStock();
         String productPath = updateProductDTO.getProductPath();
 
-        if(category != null){
+        StringBuilder oldData = new StringBuilder("{");
+        StringBuilder newData = new StringBuilder("{");
+
+        if (category != null) {
+            oldData.append("\"categoryId\": \"").append(product.getCategory().getCategoryId()).append("\", ");
+            newData.append("\"categoryId\": \"").append(category.getCategoryId()).append("\", ");
             product.setCategory(category);
         }
 
-        if(productName != null){
+        if (productName != null) {
+            oldData.append("\"productName\": \"").append(product.getProductName()).append("\", ");
+            newData.append("\"productName\": \"").append(productName).append("\", ");
             product.setProductName(productName);
         }
 
-        if(description != null){
+        if (description != null) {
+            oldData.append("\"description\": \"").append(product.getDescription()).append("\", ");
+            newData.append("\"description\": \"").append(description).append("\", ");
             product.setDescription(description);
         }
 
-        if(purchasePrice != null){
+        if (purchasePrice != null) {
+            oldData.append("\"purchasePrice\": ").append(product.getPurchasePrice()).append(", ");
+            newData.append("\"purchasePrice\": ").append(purchasePrice).append(", ");
             product.setPurchasePrice(purchasePrice);
         }
 
-        if(salePrice != null){
+        if (salePrice != null) {
+            oldData.append("\"salePrice\": ").append(product.getSalePrice()).append(", ");
+            newData.append("\"salePrice\": ").append(salePrice).append(", ");
             product.setSalePrice(salePrice);
         }
 
-        if(stock != null){
+        if (stock != null) {
+            oldData.append("\"stock\": ").append(product.getStock()).append(", ");
+            newData.append("\"stock\": ").append(stock).append(", ");
             product.setStock(stock);
         }
 
-        if(productPath != null){
+        if (productPath != null) {
+            oldData.append("\"productPath\": \"").append(product.getImagePath()).append("\", ");
+            newData.append("\"productPath\": \"").append(productPath).append("\", ");
             product.setImagePath(productPath);
         }
 
+        // Limpia las comas finales y cierra los JSON
+        trimTrailingComma(oldData);
+        trimTrailingComma(newData);
+
+        oldData.append("}");
+        newData.append("}");
+
+        return Pair.of(oldData.toString(), newData.toString());
     }
+
+    private static void trimTrailingComma(StringBuilder sb) {
+        if (sb.length() > 2 && sb.charAt(sb.length() - 2) == ',') {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+    }
+
+
+
+
 
 }
