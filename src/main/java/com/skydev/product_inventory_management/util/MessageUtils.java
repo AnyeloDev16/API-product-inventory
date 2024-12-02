@@ -48,4 +48,31 @@ public class MessageUtils {
     @Value("${error.message.page.page_invalid}")
     public String PAGE_INVALID;
 
+    @Value("${error.message.address.id_not_found}")
+    public String ADDRESS_ID_NOT_FOUND;
+
+    @Value("${error.message.address.id_invalid}")
+    public String ADDRESS_ID_INVALID;
+
+    @Value("${error.message.payment.id_provider_not_found}")
+    public String PAYMENT_PROVIDER_ID_NOT_FOUND;
+
+    @Value("${error.message.payment.id_method_not_found}")
+    public String PAYMENT_METHOD_ID_NOT_FOUND;
+
+    @Value("${error.message.payment.id_provider_invalid}")
+    public String PAYMENT_PROVIDER_ID_INVALID;
+
+    @Value("${error.message.payment.id_method_invalid}")
+    public String PAYMENT_METHOD_ID_INVALID;
+
+    @Value("${message.order.successful_purchase}")
+    public String ORDER_SUCCESSFUL_PURCHASE;
+
+    @Value("${error.message.order.id_not_found}")
+    public String ORDER_ID_NOT_FOUND;
+
+    @Value("${error.message.order.id_invalid}")
+    public String ORDER_ID_INVALID;
+
 }

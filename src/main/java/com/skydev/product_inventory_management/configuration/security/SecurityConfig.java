@@ -47,6 +47,7 @@ public class SecurityConfig{
                      // PUBLIC
                     .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/product/user/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/payment/**").permitAll()
                     // PROTECTED
                     //User
                     .requestMatchers(HttpMethod.GET, "/api/user").hasRole(ROLE_ADMIN)
@@ -62,6 +63,18 @@ public class SecurityConfig{
                     .requestMatchers(HttpMethod.GET, "/api/product/staff/**").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
                     .requestMatchers(HttpMethod.POST, "/api/product/staff").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
                     .requestMatchers(HttpMethod.PUT, "/api/product/staff/**").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    //Address
+                    .requestMatchers(HttpMethod.POST, "/api/address").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.PUT, "/api/address/{idAddress}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.GET, "/api/address/**").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    //Order
+                    .requestMatchers(HttpMethod.GET, "/api/order/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.GET, "/api/order/details/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.GET, "/api/order/user/{userId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.GET, "/api/order").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.PUT, "/api/order/cancel/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.PUT, "/api/order/changeStatus/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
+                    .requestMatchers(HttpMethod.POST, "api/order").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     // REMAINING
                     .anyRequest().denyAll())
                 .exceptionHandling(exception -> exception

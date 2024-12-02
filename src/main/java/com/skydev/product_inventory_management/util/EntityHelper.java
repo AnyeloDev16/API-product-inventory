@@ -1,9 +1,11 @@
 package com.skydev.product_inventory_management.util;
 
+import com.skydev.product_inventory_management.persistence.entity.Address;
 import com.skydev.product_inventory_management.persistence.entity.Category;
 import com.skydev.product_inventory_management.persistence.entity.Product;
 import com.skydev.product_inventory_management.persistence.entity.UserEntity;
 import com.skydev.product_inventory_management.persistence.entity.enums.Gender;
+import com.skydev.product_inventory_management.presentation.dto.request.address.UpdateAddressDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.category.UpdateCategoryDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.product.UpdateProductDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.user.UpdateUserDTO;
@@ -59,6 +61,41 @@ public class EntityHelper {
 
         if(categoryName != null){
             category.setCategoryName(categoryName);
+        }
+
+    }
+
+    public static void updateAddress(Address address, UpdateAddressDTO updateAddress){
+
+        String addressLine = updateAddress.getAddressLine();
+        String zipCode = updateAddress.getZipCode();
+        String street = updateAddress.getStreet();
+        String district = updateAddress.getDistrict();
+        String department = updateAddress.getDepartment();
+        String country = updateAddress.getCountry();
+
+        if(addressLine != null){
+            address.setAddressLine(addressLine);
+        }
+
+        if(zipCode != null){
+            address.setZipCode(zipCode);
+        }
+
+        if(street != null){
+            address.setStreet(street);
+        }
+
+        if(district != null){
+            address.setDistrict(district);
+        }
+
+        if(department != null){
+            address.setDepartment(department);
+        }
+
+        if(country != null){
+            address.setCountry(country);
         }
 
     }
@@ -131,9 +168,5 @@ public class EntityHelper {
             sb.delete(sb.length() - 2, sb.length());
         }
     }
-
-
-
-
 
 }
