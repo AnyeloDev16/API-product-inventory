@@ -9,17 +9,24 @@ import com.skydev.product_inventory_management.presentation.dto.response.order.R
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDetailDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderWithOrderDetailsDTO;
 import com.skydev.product_inventory_management.service.exceptions.InvalidInputException;
+import com.skydev.product_inventory_management.service.interfaces.IMailService;
 import com.skydev.product_inventory_management.service.interfaces.IOrderService;
+import com.skydev.product_inventory_management.service.interfaces.IPdfReportService;
 import com.skydev.product_inventory_management.util.JwtUtils;
 import com.skydev.product_inventory_management.util.MessageUtils;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -28,21 +35,32 @@ import java.util.List;
 public class OrderController {
 
     private final IOrderService orderService;
+    private final IMailService mailService;
+    private final IPdfReportService pdfService;
     private final MessageUtils messageUtils;
     private final JwtUtils jwtUtils;
 
     @PostMapping
-    public ResponseEntity<ResponseOrderBuyDTO> buyOrder(@Valid @RequestBody RegisterOrderDTO registerOrderDTO, @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<ResponseOrderBuyDTO> buyOrder(@Valid @RequestBody RegisterOrderDTO registerOrderDTO, @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) throws JRException, IOException, MessagingException {
 
         authHeader = authHeader.substring(7);
 
         DecodedJWT decodedJWT = jwtUtils.validateToken(authHeader);
 
         Long idUser = decodedJWT.getClaim("idUser").asLong();
+        String emailUser = decodedJWT.getClaim("emailUser").asString();
+
+        ResponseOrderBuyDTO responseOrderBuyDTO = orderService.buyOrder(registerOrderDTO, idUser);
+
+        File file = pdfService.generatePDF(idUser, registerOrderDTO.getAddressId(), registerOrderDTO, responseOrderBuyDTO.getOrderID());
+
+        mailService.sendEmailWithFile(emailUser, messageUtils.ORDER_SUCCESSFUL_PURCHASE, "", file);
+
+        Files.delete(file.toPath());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(orderService.buyOrder(registerOrderDTO, idUser));
+                .body(responseOrderBuyDTO);
 
     }
 

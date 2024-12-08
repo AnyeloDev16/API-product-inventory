@@ -61,7 +61,7 @@ public class AuthServiceImpl implements IAuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtUtils.createToken(authentication, user.getUserId());
+        String accessToken = jwtUtils.createToken(authentication, user.getUserId(), user.getEmail());
 
         ResponseUserDTO responseUserDTO = modelMapper.map(user, ResponseUserDTO.class);
 
@@ -97,7 +97,7 @@ public class AuthServiceImpl implements IAuthService {
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(credential.getUsername(), null, getSimpleGrantedAuthorities(role));
 
-        String accessToken = jwtUtils.createToken(authentication, newUser.getUserId());
+        String accessToken = jwtUtils.createToken(authentication, newUser.getUserId(), newUser.getEmail());
 
         ResponseUserDTO responseUserDTO = modelMapper.map(newUser, ResponseUserDTO.class);
 

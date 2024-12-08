@@ -26,7 +26,7 @@ public class JwtUtils {
     @Value("${security.jwt.expiration_minutes}")
     private long expirationMinutes;
 
-    public String createToken(Authentication authentication, Long idUser){
+    public String createToken(Authentication authentication, Long idUser, String emailUser){
 
         Algorithm algorithm = Algorithm.HMAC256(privateKey);
 
@@ -41,6 +41,7 @@ public class JwtUtils {
                 .withSubject(username)
                 .withClaim("authorities", authorities)
                 .withClaim("idUser", idUser)
+                .withClaim("emailUser", emailUser)
                 .withIssuedAt(new Date()) // Momento actual que se creo el token
                 .withExpiresAt(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(expirationMinutes)))
                 .withJWTId(UUID.randomUUID().toString())

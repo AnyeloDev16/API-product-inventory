@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,10 +14,14 @@ import java.util.Set;
 @NoArgsConstructor
 public class RegisterOrderDTO {
 
+    @NotNull(message = "Address is required")
+    @Positive(message = "Address is invalid")
+    private Long addressId;
+
     @Valid
     @NotNull(message = "Order details is required")
     @NotEmpty(message = "Min one order detail")
-    private Set<RegisterOrderDetailDTO> orderDetails;
+    private List<RegisterOrderDetailDTO> orderDetails;
 
     @NotNull(message = "Total amount is required")
     @DecimalMin(value = "0.01", message = "Total amount must be greater than 0.01")
@@ -25,7 +29,7 @@ public class RegisterOrderDTO {
     private BigDecimal totalAmount;
 
     @NotNull(message = "Payment method is required")
-    @Positive(message = "Payment method")
+    @Positive(message = "Payment method is invalid")
     private Long paymentMethodId;
 
 }
