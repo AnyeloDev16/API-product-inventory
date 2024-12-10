@@ -2,15 +2,15 @@ package com.skydev.product_inventory_management.service.implementation;
 
 import com.skydev.product_inventory_management.persistence.entity.*;
 import com.skydev.product_inventory_management.persistence.entity.enums.OrderStatus;
-import com.skydev.product_inventory_management.persistence.repository.IOrderDetailRepository;
-import com.skydev.product_inventory_management.persistence.repository.IOrderPagingRepository;
-import com.skydev.product_inventory_management.persistence.repository.IOrderRepository;
-import com.skydev.product_inventory_management.presentation.dto.request.order.RegisterOrderDTO;
+import com.skydev.product_inventory_management.persistence.repository.*;
+import com.skydev.product_inventory_management.presentation.dto.response.cart.ResponseCartDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.cart.ResponseCartItemDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderBuyDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDetailDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderWithOrderDetailsDTO;
 import com.skydev.product_inventory_management.service.exceptions.EntityNotFoundException;
+import com.skydev.product_inventory_management.service.interfaces.ICartService;
 import com.skydev.product_inventory_management.service.interfaces.IOrderService;
 import com.skydev.product_inventory_management.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
@@ -31,29 +31,36 @@ public class OrderServiceImpl implements IOrderService {
     private final IOrderRepository orderRepository;
     private final IOrderDetailRepository orderDetailRepository;
     private final IOrderPagingRepository orderPagingRepository;
+    private final ICartService cartService;
     private final MessageUtils messageUtils;
 
     @Override
     @Transactional
-    public ResponseOrderBuyDTO buyOrder(RegisterOrderDTO registerOrderDTO, Long userId) {
+    public ResponseOrderBuyDTO buyOrder(Long userId, Long paymentMethodId) {
+
+        ResponseCartDTO findCart = cartService.findCartByUserId(userId);
+
+        List<ResponseCartItemDTO> listCartItem = cartService.getAllCartItemsByCartId(findCart.getCartId());
 
         Order order = Order.builder()
                 .user(UserEntity.builder().userId(userId).build())
-                .totalAmount(registerOrderDTO.getTotalAmount())
+                .totalAmount(BigDecimal.valueOf(listCartItem.stream()
+                        .mapToDouble(cartItem -> cartItem.getProductPrice().doubleValue()*cartItem.getQuantity())
+                        .sum()))
                 .orderDate(LocalDateTime.now())
-                .paymentMethod(PaymentMethod.builder().paymentMethodId(registerOrderDTO.getPaymentMethodId()).build())
+                .paymentMethod(PaymentMethod.builder().paymentMethodId(paymentMethodId).build())
                 .orderStatus(OrderStatus.PAID)
                 .build();
 
         orderRepository.save(order);
 
-        List<OrderDetail> listOrderDetails = registerOrderDTO.getOrderDetails().stream()
-                .map(responseOD -> OrderDetail.builder()
-                        .order(Order.builder().orderId(order.getOrderId()).build())
-                        .product(Product.builder().productId(responseOD.getProductId()).build())
-                        .unitPrice(responseOD.getUnitPrice())
-                        .quantity(responseOD.getQuantity())
-                        .build())
+        List<OrderDetail> listOrderDetails = listCartItem.stream()
+                .map(cartItem -> OrderDetail.builder()
+                            .order(Order.builder().orderId(order.getOrderId()).build())
+                            .product(Product.builder().productId(cartItem.getProductId()).build())
+                            .unitPrice(cartItem.getProductPrice())
+                            .quantity(cartItem.getQuantity())
+                            .build())
                 .toList();
 
         orderDetailRepository.saveAll(listOrderDetails);

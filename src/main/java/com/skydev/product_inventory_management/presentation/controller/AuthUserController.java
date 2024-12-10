@@ -2,6 +2,7 @@ package com.skydev.product_inventory_management.presentation.controller;
 
 import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserAuthDTO;
 import com.skydev.product_inventory_management.service.interfaces.IAuthService;
+import com.skydev.product_inventory_management.service.interfaces.ICartService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import com.skydev.product_inventory_management.presentation.dto.request.user.Reg
 public class AuthUserController {
 
     private final IAuthService authService;
+    private final ICartService cartService;
 
     @PostMapping("/log-in")
     public ResponseEntity<ResponseUserAuthDTO> login(@Valid @RequestBody LoginUserAuthDTO loginAuth) {
@@ -41,6 +43,8 @@ public class AuthUserController {
     public ResponseEntity<ResponseUserAuthDTO> register(@Valid @RequestBody RegisterUserAuthDTO registerUserDTO){
 
         ResponseUserAuthDTO response = authService.register(registerUserDTO);
+
+        cartService.createCart(response.getUser().getUserId());
 
         return ResponseEntity
                         .status(HttpStatus.CREATED)

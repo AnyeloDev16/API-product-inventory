@@ -74,8 +74,10 @@ public class SecurityConfig{
                     .requestMatchers(HttpMethod.GET, "/api/order").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
                     .requestMatchers(HttpMethod.PUT, "/api/order/cancel/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     .requestMatchers(HttpMethod.PUT, "/api/order/changeStatus/{orderId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER)
-                    .requestMatchers(HttpMethod.POST, "api/order").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.POST, "/api/order").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     // REMAINING
+                    .requestMatchers(HttpMethod.POST, "/api/cart").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
+                    .requestMatchers(HttpMethod.DELETE, "/api/cart/{productId}").hasAnyRole(ROLE_ADMIN, ROLE_MANAGER, ROLE_USER)
                     .anyRequest().denyAll())
                 .exceptionHandling(exception -> exception
                     .authenticationEntryPoint(customAuthenticationEntryPointHandler)

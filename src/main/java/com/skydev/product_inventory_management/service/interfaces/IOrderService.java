@@ -1,7 +1,6 @@
 package com.skydev.product_inventory_management.service.interfaces;
 
 import com.skydev.product_inventory_management.persistence.entity.enums.OrderStatus;
-import com.skydev.product_inventory_management.presentation.dto.request.order.RegisterOrderDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderBuyDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDetailDTO;
@@ -12,7 +11,7 @@ import java.util.List;
 
 public interface IOrderService {
 
-    ResponseOrderBuyDTO buyOrder(RegisterOrderDTO registerOrderDTO, Long userId);
+    ResponseOrderBuyDTO buyOrder(Long userId, Long paymentMethodId);
     void cancelOrder(Long orderId);
     ResponseOrderWithOrderDetailsDTO getOrderById(Long orderId);
     void changeOrderStatus(Long orderId, OrderStatus orderStatus);

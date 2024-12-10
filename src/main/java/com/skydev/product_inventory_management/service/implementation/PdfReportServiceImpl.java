@@ -2,14 +2,10 @@ package com.skydev.product_inventory_management.service.implementation;
 
 import com.skydev.product_inventory_management.persistence.entity.Address;
 import com.skydev.product_inventory_management.persistence.entity.UserEntity;
-import com.skydev.product_inventory_management.presentation.dto.request.order.RegisterOrderDTO;
-import com.skydev.product_inventory_management.presentation.dto.request.order.RegisterOrderDetailDTO;
-import com.skydev.product_inventory_management.presentation.dto.response.product.ResponseProductUserDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.cart.ResponseCartDTO;
+import com.skydev.product_inventory_management.presentation.dto.response.cart.ResponseCartItemDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.user.ResponseUserAdminDTO;
-import com.skydev.product_inventory_management.service.interfaces.IAddressService;
-import com.skydev.product_inventory_management.service.interfaces.IPdfReportService;
-import com.skydev.product_inventory_management.service.interfaces.IProductService;
-import com.skydev.product_inventory_management.service.interfaces.IUserEntityService;
+import com.skydev.product_inventory_management.service.interfaces.*;
 import com.skydev.product_inventory_management.util.ItemOrderUtil;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.*;
@@ -29,12 +25,12 @@ public class PdfReportServiceImpl implements IPdfReportService {
 
     private final IUserEntityService userEntityService;
     private final IAddressService addressService;
-    private final IProductService productService;
+    private final ICartService cartService;
     private final ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
     @Override
-    public File generatePDF(Long userId, Long addressId, RegisterOrderDTO registerOrderDTO, Long orderId) throws JRException, IOException {
+    public File generatePDF(Long userId, Long addressId, Long orderId) throws JRException, IOException {
 
         UserEntity user = modelMapper.map(userEntityService.findUserById(userId, ResponseUserAdminDTO.class), UserEntity.class);
         Address address = modelMapper.map(addressService.getAddressById(addressId), Address.class);
@@ -50,7 +46,9 @@ public class PdfReportServiceImpl implements IPdfReportService {
 
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(report);
 
-            List<ItemOrderUtil> data = convertListItemOrder(registerOrderDTO.getOrderDetails());
+            ResponseCartDTO findCart = cartService.findCartByUserId(userId);
+
+            List<ItemOrderUtil> data = convertListItemOrder(cartService.getAllCartItemsByCartId(findCart.getCartId()));
 
             JRBeanCollectionDataSource dsPurchaseDetailReport = new JRBeanCollectionDataSource(data);
 
@@ -68,7 +66,9 @@ public class PdfReportServiceImpl implements IPdfReportService {
             parameters.put("department", address.getDepartment());
             parameters.put("country", address.getCountry());
             parameters.put("zipCode", address.getZipCode());
-            parameters.put("totalAmount", registerOrderDTO.getTotalAmount());
+            parameters.put("totalAmount", BigDecimal.valueOf(data.stream()
+                    .mapToDouble(iou -> iou.getUnitPrice().doubleValue()*iou.getQuantity())
+                    .sum()));
             parameters.put("gitHubLogo", gitHubLogo);
             parameters.put("gmailLogo", gmailLogo);
 
@@ -90,15 +90,15 @@ public class PdfReportServiceImpl implements IPdfReportService {
     }
 
     @Transactional(readOnly = true)
-    public List<ItemOrderUtil> convertListItemOrder(List<RegisterOrderDetailDTO> orderDetails) {
+    public List<ItemOrderUtil> convertListItemOrder(List<ResponseCartItemDTO> cartItems) {
 
-        return orderDetails.stream()
-                .map(od -> ItemOrderUtil.builder()
-                        .productId(od.getProductId())
-                        .productName(productService.findProductById(od.getProductId(), ResponseProductUserDTO.class).getProductName())
-                        .unitPrice(od.getUnitPrice())
-                        .quantity(od.getQuantity())
-                        .subTotal(BigDecimal.valueOf(od.getUnitPrice().longValue() * od.getQuantity()))
+        return cartItems.stream()
+                .map(ci -> ItemOrderUtil.builder()
+                        .productId(ci.getProductId())
+                        .productName(ci.getProductName())
+                        .unitPrice(ci.getProductPrice())
+                        .quantity(ci.getQuantity())
+                        .subTotal(BigDecimal.valueOf(ci.getProductPrice().longValue() * ci.getQuantity()))
                         .build())
                 .toList();
     }

@@ -75,4 +75,7 @@ public class MessageUtils {
     @Value("${error.message.order.id_invalid}")
     public String ORDER_ID_INVALID;
 
+    @Value("${error.message.cart.id_not_found}")
+    public String CART_ID_NOT_FOUND;
+
 }

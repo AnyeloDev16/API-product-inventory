@@ -2,16 +2,14 @@ package com.skydev.product_inventory_management.presentation.controller;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.skydev.product_inventory_management.persistence.entity.enums.OrderStatus;
-import com.skydev.product_inventory_management.presentation.dto.request.order.RegisterOrderDTO;
+import com.skydev.product_inventory_management.presentation.dto.request.order.BuyDetailDTO;
 import com.skydev.product_inventory_management.presentation.dto.request.order.UpdateOrderStatusDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderBuyDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderDetailDTO;
 import com.skydev.product_inventory_management.presentation.dto.response.order.ResponseOrderWithOrderDetailsDTO;
 import com.skydev.product_inventory_management.service.exceptions.InvalidInputException;
-import com.skydev.product_inventory_management.service.interfaces.IMailService;
-import com.skydev.product_inventory_management.service.interfaces.IOrderService;
-import com.skydev.product_inventory_management.service.interfaces.IPdfReportService;
+import com.skydev.product_inventory_management.service.interfaces.*;
 import com.skydev.product_inventory_management.util.JwtUtils;
 import com.skydev.product_inventory_management.util.MessageUtils;
 import jakarta.mail.MessagingException;
@@ -37,11 +35,16 @@ public class OrderController {
     private final IOrderService orderService;
     private final IMailService mailService;
     private final IPdfReportService pdfService;
+    private final ICartService cartService;
     private final MessageUtils messageUtils;
     private final JwtUtils jwtUtils;
 
     @PostMapping
-    public ResponseEntity<ResponseOrderBuyDTO> buyOrder(@Valid @RequestBody RegisterOrderDTO registerOrderDTO, @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) throws JRException, IOException, MessagingException {
+    public ResponseEntity<ResponseOrderBuyDTO> buyOrder(@Valid @RequestBody BuyDetailDTO buyDetailDTO, @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authHeader) throws JRException, IOException, MessagingException {
+
+        if(buyDetailDTO.getPaymentMethodId() <= 0){
+            throw new InvalidInputException(messageUtils.PAYMENT_METHOD_ID_INVALID);
+        }
 
         authHeader = authHeader.substring(7);
 
@@ -50,9 +53,11 @@ public class OrderController {
         Long idUser = decodedJWT.getClaim("idUser").asLong();
         String emailUser = decodedJWT.getClaim("emailUser").asString();
 
-        ResponseOrderBuyDTO responseOrderBuyDTO = orderService.buyOrder(registerOrderDTO, idUser);
+        ResponseOrderBuyDTO responseOrderBuyDTO = orderService.buyOrder(idUser, buyDetailDTO.getPaymentMethodId());
 
-        File file = pdfService.generatePDF(idUser, registerOrderDTO.getAddressId(), registerOrderDTO, responseOrderBuyDTO.getOrderID());
+        File file = pdfService.generatePDF(idUser, buyDetailDTO.getAddressId(), responseOrderBuyDTO.getOrderID());
+
+        cartService.deleteAllCartItems(idUser);
 
         mailService.sendEmailWithFile(emailUser, messageUtils.ORDER_SUCCESSFUL_PURCHASE, "", file);
 
